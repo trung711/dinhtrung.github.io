@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Đăng Ký Môn Học</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- Jquery library -->
+    <script src="https://code.jquery.com/jquery-3.5.1.js"
+        integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+
+    <script th:inline="javascript">
+        $(document).ready(function(){
+            //$idSV = 2;
+            //$idKhoa = 1;
+            $idKiHoc = [[${idkihoc}]];
+            $idSvKhoa = [[${idsvk}]];
+
+            $.post('/dangky/dsdangky',{
+                idsvk: $idSvKhoa,
+                idkihoc: $idKiHoc
+            }, function(data){
+                if(data.errorCode == 200){
+                    $strHtml = '';
+                    $thongTin = data.wsResponse;
+
+                    $sinhVien = $thongTin.sinhVienKhoa.sinhVien;
+                    $khoa = $thongTin.sinhVienKhoa.khoa;
+                    $strHtml = 'Mã sinh viên: '+$sinhVien.masv+'<br>Họ và tên: '+$sinhVien.hodem+' '+$sinhVien.ten+
+                    '<br>Ngành học: '+$khoa.ten;
+
+                    $('#thongTinSV').html($strHtml);
+
+                    $strHtml = '';
+                    $tongTin = 0;
+
+                    $dsDangKy = $thongTin.dangKiHocList;
+
+                    $.map($dsDangKy, function(value, index){
+                        $strHtml += '<tr>\n';
+                        $strHtml += '<td scope="row">'+(index+1)+'</td>\n';
+                        $strHtml += '<td>'+value.lopHocPhan.id+'</td>\n';
+                        $strHtml += '<td>'+value.lopHocPhan.monHocKiHoc.monHoc.ten+'</td>\n';
+                        $strHtml += '<td>'+value.lopHocPhan.ten+'</td>\n';
+                        $strHtml += '<td>'+value.lopHocPhan.monHocKiHoc.monHoc.sotinchi+'</td>\n';
+                        $strHtml += '<td><a href="#" class="xemLich"><i class="fa fa-calendar-plus-o" aria-hidden="true"></i>(Xem lịch)</a></td>\n';
+                        $strHtml += '<td><a href="#" class="xoa"><i class="fa fa-trash" aria-hidden="true"></i>Xóa</a></td>\n';
+
+                        $tongTin += value.lopHocPhan.monHocKiHoc.monHoc.sotinchi;
+                    });
+
+                    $('#dangKyData').html($strHtml);
+                    $('#tongTin').text('Tổng số tín chỉ: '+$tongTin);
+
+                    $('.xemLich').click(function(){
+                        $idLopHoc = $(this).parent().parent().children().eq(1).text();
+                        $(this).attr('href','/dangky/xemlich2?idlhp='+$idLopHoc);
+                    });
+
+                    $('.xoa').click(function(){
+                        $idLopHoc = $(this).parent().parent().children().eq(1).text();
+                        //alert($idLopHoc);
+                        //alert("click!");
+
+                        $.post('/dangky/xoalophoc',{
+                            idlhp: $idLopHoc,
+                            idsvk: $idSvKhoa
+                        },function(data){
+                            if(data.errorCode == 200){
+                                alert("Xóa thành công!");
+                            }else{
+                                alert("Yêu cầu xóa không thành công!");
+                            }
+                            location.reload();
+                        });
+                    });
+                }
+
+
+            });
+
+
+        });
+    </script>
+</head>
+
+<body>
+    <main class="container">
+        <header class="row pt-5 pb-2">
+            <div class="col-9">
+                <h1>PTIT</h1>
+            </div>
+            <div class="col-3">
+                <img src="/Logo_PTIT_University.png" class="ml-2" height="100px" alt="">
+            </div>
+        </header>
+        <nav class="row">
+            <div class="col">
+                <nav class="navbar navbar-expand-sm navbar-light bg-light">
+
+                    <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse"
+                        data-target="#collapsibleNavId" aria-controls="collapsibleNavId" aria-expanded="false"
+                        aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="collapsibleNavId">
+                        <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                            <li class="nav-item active">
+                                <a class="nav-link" href="/">
+                                    <i class="fa fa-home" aria-hidden="true"></i>
+                                    Trang Chủ <span class="sr-only">(current)</span></a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                    Đăng Ký Môn Học</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                                    Thời Khóa Biểu</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="dropdownId" data-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false">Tài Khoản</a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownId">
+                                    <a class="dropdown-item" href="/logout">Đăng xuất</a>
+                                    <a class="dropdown-item" href="#">Đổi mật khẩu</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </nav>
+        <section class="row">
+            <div class="col">
+                <form action="" method="post">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col">
+
+                                    <div class="row">
+                                        <div class="col-10 offset-1">
+                                            <h4 class="card-title">Đăng Ký Môn Học</h4>
+                                            <p id="thongTinSV">
+                                                Mã sinh viên: B18DCCN001
+                                                <br>
+                                                Họ và tên: Nguyễn Văn B
+                                                <br>
+                                                Ngành học: Công nghệ thông tin
+                                            </p>
+                                        </div>
+                                        <div class="col-10 offset-1 mt-2">
+                                            <strong>Lớp học phần đã đăng ký:</strong>
+
+                                            <table class="table table-striped table-responsive-md table-bordered">
+                                                <thead class="thead-default">
+                                                    <tr>
+                                                        <th>TT</th>
+                                                        <th>Mã lớp học phần</th>
+                                                        <th>Tên môn học</th>
+                                                        <th>Tên lớp học phần</th>
+                                                        <th>Số tín chỉ</th>
+                                                        <th>Lịch học</th>
+                                                        <th>&nbsp;</th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="dangKyData">
+                                                    <tr>
+                                                        <td scope="row">1</td>
+                                                        <td>hdt111</td>
+                                                        <td>Lập trình hướng đối tượng</td>
+                                                        <td>HDT-N2</td>
+                                                        <td>3</td>
+                                                        <td>
+                                                            <a href="#" class="xemLich">
+                                                                <i class="fa fa-calendar-plus-o" aria-hidden="true"></i>
+                                                                (Xem lịch)</a>
+                                                        </td>
+
+                                                        <td>
+                                                            <a href="#" class="xoa">
+                                                                <i class="fa fa-trash" aria-hidden="true"></i>
+                                                                Xóa
+                                                            </a>
+                                                        </td>
+
+                                                    </tr>
+                                                    <tr>
+                                                        <td scope="row">2</td>
+                                                        <td>android111</td>
+                                                        <td>Lập trình thiết bị di động</td>
+                                                        <td>LTTBDD-N5</td>
+                                                        <td>3</td>
+                                                        <td>
+                                                            <a href="#">
+                                                                <i class="fa fa-calendar-plus-o" aria-hidden="true"></i>
+                                                                (Xem lịch)</a>
+                                                        </td>
+
+                                                        <td>
+                                                            <a href="#" id="btnXoa">
+                                                                <i class="fa fa-trash" aria-hidden="true"></i>
+                                                                Xóa
+                                                            </a>
+                                                        </td>
+
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+
+                                            <strong class="mt-2" id="tongTin">
+                                                Tổng số tín chỉ: 6
+                                            </strong>
+                                            <div class="alert alert-success" role="alert">
+                                                <!-- Thông báo lưu thành công -->
+                                                <strong></strong>
+                                            </div>
+                                            <a href="/dangky/chonmon" class="btn btn-secondary ">Chọn Môn Học</a>
+                                            <button type="submit" class="btn btn-primary">Lưu</button>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+    <!-- Optional JavaScript -->
+    <!-- Popper.js, then Bootstrap JS -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Chọn Ngành</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- Jquery library -->
+    <script src="https://code.jquery.com/jquery-3.5.1.js"
+        integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+
+    <script th:inline="javascript">
+        $(document).ready(function () {
+            //alert("kich hoat");
+            $idSV = [[${idsv}]];
+
+            $.post('/dangky/dskhoa',{
+                id: $idSV
+            }, function(data, status){
+                //alert(data);
+                $khoaRes = data;
+                $khoaList = $khoaRes.wsResponse.listKhoa;
+                $strHTML = '';
+                $.map($khoaList, function(value, index){
+                    
+                    $strHTML += '<option value="'+value.id+'">'+value.ten+'</option>\n';
+                    
+                });
+
+                $("#nganh").html($strHTML);
+            });
+
+            $.get('/dangky/dskihoc',function(data){
+                $kiHoc = data;
+                
+                if(data.errorCode == '200'){
+                    $kiHocList = data.wsResponse.listKiHoc;
+                    $strHTML = ''
+                    $.map($kiHocList, function(value, index){
+                        $strHTML += '<option value="'+value.id+'">'+value.hocKi.ten+' Năm học '+value.namHoc.ten+'</option>\n';
+                    });
+
+                    $('#kyHoc').html($strHTML);
+                }
+            });
+
+            $('#vaoDangKy').click(function(){
+                $valueNganh = $('#nganh').val();
+                $valueKiHoc = $('#kyHoc').val();
+                //alert('Nganh: '+$valueNganh+'\nKiHoc: '+$valueKiHoc);
+
+                $.post('/dangky/setCookie',{
+                    idsv: $idSV,
+                    idkhoa: $valueNganh,
+                    idkihoc: $valueKiHoc
+                },function(data){
+                    if(data == 200){
+                        window.location.replace('http://localhost:8080/dangky');
+                    }
+                });
+            });
+
+            /*$.post('dangky/dskhoa',{
+                id: $idSV
+            }, function(data){
+                alert(data);
+            }).fail(function(data){
+                alert(data);
+            });
+
+            $.post('/dangky/test', function (data) {
+                alert(data);
+            });*/
+        });
+    </script>
+</head>
+
+<body>
+    <main class="container">
+        <header class="row pt-5 pb-2">
+            <div class="col-9">
+                <h1>PTIT</h1>
+            </div>
+            <div class="col-3">
+                <img src="/Logo_PTIT_University.png" class="ml-2" height="100px" alt="">
+            </div>
+        </header>
+        <nav class="row">
+            <div class="col">
+                <nav class="navbar navbar-expand-sm navbar-light bg-light">
+
+                    <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse"
+                        data-target="#collapsibleNavId" aria-controls="collapsibleNavId" aria-expanded="false"
+                        aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="collapsibleNavId">
+                        <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                            <li class="nav-item active">
+                                <a class="nav-link" href="/">
+                                    <i class="fa fa-home" aria-hidden="true"></i>
+                                    Trang Chủ <span class="sr-only">(current)</span></a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                    Đăng Ký Môn Học</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                                    Thời Khóa Biểu</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="dropdownId" data-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false">Tài Khoản</a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownId">
+                                    <a class="dropdown-item" href="/logout">Đăng xuất</a>
+                                    <a class="dropdown-item" href="#">Đổi mật khẩu</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </nav>
+        <section class="row">
+            <div class="col">
+                <form action="" method="post">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-4 offset-4">
+                                    <h4 class="card-title">Chọn Ngành Học</h4>
+                                    <div class="form-group">
+                                        <label for="nganh">Ngành:</label>
+                                        <select class="form-control" name="nganh" id="nganh">
+                                            <option value="cntt">Công nghệ thông tin</option>
+                                            <option value="marketing">Marketing</option>
+                                            <option value="dientu">Điện tử</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="kyHoc">Kỳ học:</label>
+                                        <select class="custom-select" name="kyHoc" id="kyHoc">
+                                            <option selected>Kỳ 2 Năm học 2021-2022</option>
+                                            <option value="ky1NH20212022">Kỳ 1 Năm học 2021-2022</option>
+                                            <option value="ky1NH20222023">Kỳ 1 Năm học 2022-2023</option>
+                                            <option value="ky1NH20202021">Kỳ 1 Năm học 2020-2021</option>
+                                        </select>
+                                    </div>
+
+                                    <a href="#" type="submit" class="btn btn-secondary btn-lg btn-block" id="vaoDangKy">Vào đăng
+                                        ký</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
